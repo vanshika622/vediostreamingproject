@@ -5,9 +5,11 @@ const verifyToken=require('../verifytoken');
 const fs=require('fs')
 const router= express.Router();
 
-router.get("/vedios",verifyToken,async (req,res)=>{
+router.get("/getvedios",verifyToken,async (req,res)=>{
+    // console.log(await vedioModel.find())
     let vedios= await vedioModel.find();
-    res.send(videos);
+
+    res.send(vedios);
 
 })
 //to get vedios based on ig

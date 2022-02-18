@@ -11,7 +11,8 @@ const vedioSchema= new mongoose.Schema({
     rating:{type:Number,min:1,max:10},
     production:{type:String,required:true},
     directors:[{type:String}],
-    vedioPath:{type:String,required:true}
+    vedioPath:{type:String,required:true},
+    thumbnail:{type:String,required:true}
 },{timespan:true})
 
 const vedioModel= new mongoose.model('vediodb',vedioSchema);

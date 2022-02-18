@@ -1,5 +1,5 @@
 const express=require('express');
-const bcrypt=require('bcryptjs')
+const bcryptjs=require('bcryptjs')
 const jsonwebtoken= require('jsonwebtoken')
 
 const userModel=require('../models/user-model');
@@ -11,9 +11,9 @@ const router= express.Router();
 router.post("/register",(req,res)=>{
     let user=req.body;
     console.log(user)
-    bcrypt.genSalt(10,(err,salt)=>{
+    bcryptjs.genSalt(10,(err,salt)=>{
         if(err==null){
-            bcrypt.hash(user.password,salt,(err,newpassword)=>{
+            bcryptjs.hash(user.password,salt,(err,newpassword)=>{
                 user.password=newpassword;
                 let userobj=new userModel(user);
                 userobj.save()
@@ -29,30 +29,67 @@ router.post("/register",(req,res)=>{
     })  
  })
 
- router.post("/login",(req,res)=>{
-    let usercred=req.body;
-    userModel.findOne({username:usercred.username})
+//  router.post("/login",(req,res)=>{
+//     //  debugger;
+//     let usercred=req.body;
+//     // res.send(usercred)
+//     userModel.findOne({username:usercred.username})
+//     .then((user)=>{
+       
+//         if(user!=null){
+//             bcryptjs.compare(usercred.password,user.password,(err,status)=>{
+//                if(!err)
+//                 if(status){
+//                     jsonwebtoken.sign(usercred,"secretkey",(err,token)=>{
+//                         if(err==null){
+//                             // res.send(err);
+//                             // res.send(user)
+//                             res.send({message:"welcome user",token:token})
+//                         }
+//                     })
+//                     res.status(401).send({message:"password do not match"})
+//                 }
+//                 else{
+//                     res.status(404).send({message:"User not found"})
+//                 }
+//             })
+//         }
+//     })
+//     .catch((err)=>{
+//         console.log(err);
+//         res.send({message:"Some problems"})
+//     })
+// })
+router.post("/login",(req,res)=>{
+    let user_creds=req.body;
+
+    userModel.findOne({username:user_creds.username})
     .then((user)=>{
-        if(user!=null){
-            bcrypt.compare(usercred.password,user.password,(err,status)=>{
-                if(status==true){
-                    jsonwebtoken.sign(usercred,"secretkey",(err,token)=>{
-                        if(err==null){
-                            res.send({message:"welcome user",token:token})
-                        }
-                    })
-                    res.status(401).send({message:"password do not match"})
-                }
-                else{
-                    res.status(404).send({message:"User not found"})
-                }
-            })
-        }
+           if(user!==null){
+                 bcryptjs.compare(user_creds.password,user.password,(err,login)=>{
+                     if(!err){
+                         if(login){
+                                   jsonwebtoken.sign(user_creds,"secretcode",(err,token)=>{
+                                       if(err==null){
+                                           res.send({ message:"Welcome User", token:token,user_id:user._id,success:true})
+                                       }
+                                   })
+                         }
+                         else{
+                            res.send({message:"Incorrect password",success:false})
+                         }
+                     }
+                 })
+           }
+           else{
+               res.send({message:"Incorrect username",success:false})
+           }
     })
     .catch((err)=>{
-        console.log(err);
-        res.send({message:"Some problems"})
+        console.log(err)
+        res.send({message:"Some Problem while login"})
     })
+
 })
 
 module.exports=router;
